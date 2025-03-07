@@ -1,0 +1,20 @@
+
+1. cluster
+만약 stop상태면 containerd 를 실행시키자
+그게 아니라면 kubelet을 보자
+
+kubectl get nodes -o wide
+ssh k8s-worker2
+
+
+2. 리소스 모니터링
+kubectl top nodes
+kubectl logs pod_name
+
+
+kubectl get pod -A -l name=order
+kubectl top pod -A -l name=order --sort-by cpu 
+
+NAMESPACE   NAME                           CPU(cores)   MEMORY(bytes)   
+devops      eshop-order-5fb8974476-6cfnl   0m           1Mi             
+devops      eshop-order-5fb8974476-dd9cr   0m           1Mi             
