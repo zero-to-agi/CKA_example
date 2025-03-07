@@ -1,0 +1,54 @@
+cat > 1.yaml 
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: app-config
+spec:
+  capacity:
+    storage: 1Gi
+  accessModes:
+    - ReadWriteMany
+  storageClassName: az-c
+  hostPath:
+    path: /srv/app-config
+  
+cat > 2-1.yaml 
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: pv-volume
+spec:
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 10Mi
+  storageClassName: app-hostpath-sc
+
+cat > 2-2.yaml 
+apiVersion: v1
+kind: Pod
+metadata:
+  name: web-server-pod
+spec:
+  volumes:
+  - name: vol
+    persistentVolumeClaim:
+      claimName: pv-volume
+  containers:
+  - name: sample
+    image: nginx
+    volumeMounts:
+    - name: vol
+      mountPath: /usr/share/nginx/html
+
+kubectl edit pvc pv-volume --record
+10Mi -> 70Mi
+
+cat > 3.yaml
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: delayed-volume-sc
+provisioner: kubernetes.io/no-provisioner
+volumeBindingMode: WaitForFirstConsumer
