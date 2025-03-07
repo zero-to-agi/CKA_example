@@ -1,0 +1,47 @@
+cat  > 1.yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: nginx-resolver
+spec:
+  containers:
+  - name: nginx
+    image: public.ecr.aws/nginx/nginx:1.26
+    ports:
+      - containerPort: 80
+        name: http-web-svc
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: nginx-resolver-service
+spec:
+  ports:
+  - name: name-of-service-port
+    protocol: TCP
+    port: 80
+    targetPort: http-web-svc
+kubectl apply -f 1.yaml
+
+cat  > 2.yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: dns-test
+spec:
+  containers:
+  - name: dns-test
+    image: public.ecr.aws/docker/library/busybox:1.35.0
+kubectl apply -f 2.yaml
+
+kubectl exec -it dns-test -- /bin/sh
+
+nslookup nginx-resolver-service > /tmp/nginx.svc
+nslookup nginx-resolver > /tmp/nginx.pod
+exit
+
+kubectl exec dns-test -- cat /tmp/nginx.svc
+kubectl exec dns-test -- cat /tmp/nginx.pod
+
+nslookup web-ui-svc.devops.svc.cluster.local
